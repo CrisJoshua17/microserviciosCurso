@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-MsvcCursosApplication<msvc-cursos>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "org.aguzman.springcloud.msvc.cursos.MsvcCursosApplication",
+            "projectName": "msvc-cursos",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-MsvcUsuariosApplication<msvc-usuarios>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "org.aguzman.springcloud.msvc.usuarios.MsvcUsuariosApplication",
+            "projectName": "msvc-usuarios",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
