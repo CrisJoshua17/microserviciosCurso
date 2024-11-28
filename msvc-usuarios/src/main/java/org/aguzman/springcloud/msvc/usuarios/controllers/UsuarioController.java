@@ -32,7 +32,7 @@ public class UsuarioController {
     @GetMapping
     public Map<String, List<Usuario>> listar() {
         return Collections.singletonMap("usuarios", service.listar());
-    }
+    }   
 
     @GetMapping("/{id}")
     public ResponseEntity<?> detalle(@PathVariable Long id) {
