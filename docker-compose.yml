@@ -1,0 +1,62 @@
+#version: "3.9" solo para v1
+services:
+  
+  mysql8:
+    image: mysql:8
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: Haikyuu1212
+      MYSQL_DATABASE: msvc_usuarios
+    volumes:
+      - data-mysql:/var/lib/mysql
+    restart: always
+    networks:
+      - spring
+
+  postgres14:
+    image: postgres:14-alpine
+    ports:
+      - "5532:5432"
+    environment:
+      POSTGRES_PASSWORD: Haikyuu1212
+      POSTGRES_DB: msvc_cursos
+    volumes:
+      - data-postgres:/var/lib/postgres
+    restart: always
+    networks:
+      - spring    
+
+
+  msvc-usuarios:
+    image: msvc-usuarios:latest
+    ports:
+      - "8001:8001"
+    env_file: ./msvc-usuarios/usuarios.env
+    networks:
+      - spring
+    depends_on:
+    - mysql8
+    restart: always
+
+
+  msvc-cursos:
+    image: msvc-cursos:latest
+    ports:
+      - "8002:8002"
+    env_file:
+      - ./msvc-cursos/cursos.env
+    networks:
+      - spring
+    depends_on:
+      - postgres14
+    restart: always
+
+      
+
+volumes:
+  data-mysql:
+  data-postgres:
+
+networks:
+  spring: 
