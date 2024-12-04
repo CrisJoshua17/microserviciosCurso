@@ -1,4 +1,5 @@
-#version: "3.9" solo para v1
+#version: "3.9" solo para docker v1
+
 services:
   
   mysql8:
@@ -22,41 +23,47 @@ services:
       POSTGRES_PASSWORD: Haikyuu1212
       POSTGRES_DB: msvc_cursos
     volumes:
-      - data-postgres:/var/lib/postgres
+      - data-postgres:/var/lib/postgresql/data
     restart: always
     networks:
       - spring    
 
-
   msvc-usuarios:
-    image: msvc-usuarios:latest
+    container_name: msvc-usuarios
+    build:
+      context: ./msvc-usuarios
+      dockerfile: Dockerfile
     ports:
       - "8001:8001"
     env_file: ./msvc-usuarios/usuarios.env
     networks:
       - spring
     depends_on:
-    - mysql8
+      - mysql8
     restart: always
 
-
   msvc-cursos:
-    image: msvc-cursos:latest
+    container_name: msvc-cursos
+    build:
+      context: ./msvc-cursos
+      dockerfile: Dockerfile
     ports:
       - "8002:8002"
     env_file:
-      - ./msvc-cursos/cursos.env
+      - ./msvc-cursos/cursos.env  
     networks:
       - spring
     depends_on:
       - postgres14
+      - msvc-usuarios
     restart: always
-
-      
 
 volumes:
   data-mysql:
+    external: true
   data-postgres:
+    external: true
 
 networks:
-  spring: 
+  spring:
+    driver: bridge
