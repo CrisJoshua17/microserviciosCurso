@@ -30,6 +30,7 @@ services:
 
   msvc-usuarios:
     container_name: msvc-usuarios
+    #image: joshua1704/msvc-usuarios para obtener de docker hub en vez de construir
     build:
       context: ./msvc-usuarios
       dockerfile: Dockerfile
@@ -44,6 +45,7 @@ services:
 
   msvc-cursos:
     container_name: msvc-cursos
+    #image: joshua1704/msvc-cursos para obtener de docker hub en vez de construir
     build:
       context: ./msvc-cursos
       dockerfile: Dockerfile
