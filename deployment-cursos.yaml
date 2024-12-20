@@ -30,3 +30,11 @@ spec:
           value: "Haikyuu1212"
         - name: USUARIOS_URL
           value: "mscv-usuarios:8001"
+        volumeMounts:
+          - name: data-mysql
+            mountPath: /var/lib/mysql  
+      volumes:
+        - name: data-mysql
+          hostPath: 
+            path: /var/lib/mysql
+            type: DirectoryOrCreate
