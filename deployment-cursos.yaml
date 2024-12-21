@@ -17,24 +17,34 @@ spec:
         name: mscv-cursos
         ports:
         - containerPort: 8002
-        env:  # Move env under the container
-        - name: PORT
-          value: "8002"
-        - name: DB_HOST
-          value: "postgres14:5432"
-        - name: DB_DATABASE
-          value: "msvc_cursos"
-        - name: DB_USERNAME
-          value: "postgres"
-        - name: DB_PASSWORD
-          value: "Haikyuu1212"
-        - name: USUARIOS_URL
-          value: "mscv-usuarios:8001"
-        volumeMounts:
-          - name: data-mysql
-            mountPath: /var/lib/mysql  
-      volumes:
-        - name: data-mysql
-          hostPath: 
-            path: /var/lib/mysql
-            type: DirectoryOrCreate
+        env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: msvc-cursos
+                  key: port
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: msvc-cursos
+                  key: db_host
+            - name: DB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: msvc-cursos
+                  key: database
+            - name: DB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: msvc-cursos
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: msvc-cursos
+                  key: password
+            - name: USUARIOS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: msvc-cursos
+                  key: usuario_url
