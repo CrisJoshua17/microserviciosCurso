@@ -8,7 +8,7 @@ data:
   database: msvc_usuarios
   username: root
   password: Haikyuu1212
-  curso_url: msvc-cursos:8002
+  curso_url: "msvc-cursos:8002"
 
 ---
 
@@ -22,5 +22,4 @@ data:
   database: msvc_cursos
   username: postgres
   password: Haikyuu1212
-  usuario_url: mscv_usuarios:8001
-
+  usuario_url: "msvc-usuarios:8001"
