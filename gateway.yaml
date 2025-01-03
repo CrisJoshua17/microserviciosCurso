@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mscv-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      role: mscv-gateway
+  template:
+    metadata:
+      labels:
+        role: mscv-gateway
+    spec:
+      containers:
+        - name: mscv-gateway
+          image: joshua1704/mscv-gateway:latest
+          ports:
+            - containerPort: 8090
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mscv-gateway
+spec:
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8090
+      targetPort: 8090
+  selector:
+    role: mscv-gateway

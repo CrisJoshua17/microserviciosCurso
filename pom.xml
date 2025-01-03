@@ -16,10 +16,13 @@
     <modules>
         <module>msvc-usuarios</module>
         <module>msvc-cursos</module>
+        <module>mscv-gateway</module>
+        <module>mscv-oauth</module>
     </modules>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <java.version>17</java.version>
         <spring-cloud.version>2021.0.1</spring-cloud.version>
     </properties>
 
@@ -28,7 +31,7 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
+                <version>2021.0.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
