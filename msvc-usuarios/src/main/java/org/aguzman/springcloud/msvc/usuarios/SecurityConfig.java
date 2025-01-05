@@ -1,6 +1,7 @@
 package org.aguzman.springcloud.msvc.usuarios;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -16,6 +17,7 @@ public class SecurityConfig {
     
 
     @Bean
+    @Order(1)
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests(authorizeRequests ->
@@ -38,4 +40,7 @@ public class SecurityConfig {
     
         return http.build();
     }
+
+
+    
 }

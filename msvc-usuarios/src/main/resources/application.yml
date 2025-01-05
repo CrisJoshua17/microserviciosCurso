@@ -8,4 +8,21 @@ spring:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
       ddl-auto: update
-  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${LB_AUTH_ISSURE_URI:http://127.0.0.1:9000}
+      client:
+        registration:
+          mscv-usuarios-client:
+            provider: spring
+            client-id: usuarios-client
+            client-secret: 12345
+            authorization-grant-type: authorization_code
+            redirect-uri: ${LB_USUARIOS_URI:http://localhost:8001}/authorized
+            scope: read
+            client-name: mscv-usuarios-client
+        provider:
+          spring:
+            issuer-uri: ${LB_AUTH_ISSUER_URI:http://127.0.0.1:9000}
