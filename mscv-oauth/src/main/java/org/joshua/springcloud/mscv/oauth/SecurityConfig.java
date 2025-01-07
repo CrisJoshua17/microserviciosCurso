@@ -1,5 +1,6 @@
 package org.joshua.springcloud.mscv.oauth;
 
+
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
@@ -7,31 +8,28 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
-import org.springframework.http.MediaType;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.config.ProviderSettings;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager; // Corregido
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -40,7 +38,6 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
 @Configuration
-@EnableWebSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -48,31 +45,31 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
-
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http)
+            throws Exception {
+        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
         http
-            .requestMatcher(authorizationServerConfigurer.getEndpointsMatcher())
-            .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
-            .csrf(csrf -> csrf.ignoringRequestMatchers(authorizationServerConfigurer.getEndpointsMatcher()))
-                .apply(authorizationServerConfigurer);
-    
-            http.exceptionHandling(exceptions -> exceptions
-                .defaultAuthenticationEntryPointFor(
-                    new LoginUrlAuthenticationEntryPoint("/login"),
-                    new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
-                )
-            );
+                // Redirect to the login page when not authenticated from the
+                // authorization endpoint
+                .exceptionHandling((exceptions) -> exceptions
+                        .authenticationEntryPoint(
+                                new LoginUrlAuthenticationEntryPoint("/login"))
+                );
 
         return http.build();
     }
 
     @Bean
     @Order(2)
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
+            throws Exception {
         http
-            .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
-            .formLogin();
+                .authorizeHttpRequests((authorize) -> authorize
+                        .anyRequest().authenticated()
+                )
+                // Form login handles the redirect to the login page from the
+                // authorization server filter chain
+                .formLogin(Customizer.withDefaults());
 
         return http.build();
     }
@@ -85,29 +82,36 @@ public class SecurityConfig {
                 .roles("USER")
                 .build();
 
-        return new InMemoryUserDetailsManager(userDetails); // Corregido
+        return new InMemoryUserDetailsManager(userDetails);
     }
+
+    @Value("${LB_USUARIOS_URI:http://127.0.0.1:56680}")
+    private String lbUsuariosUri;
+
+    @Value("${LB_AUTH_ISSUER_URI:http://127.0.0.1:56609}")
+    private String lbAuthIssuerUri;
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
-        RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
+        System.out.println("LB_USUARIOS_URI: " + lbUsuariosUri);
+        System.out.println("LB_AUTH_ISSUER_URI: " + lbAuthIssuerUri);
+
+        RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId("usuarios-client")
                 .clientSecret("{noop}12345")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .redirectUri(env.getProperty("LB_USUARIOS_URI") + "/login/oauth2/code/mscv-usuarios-client")
-                .redirectUri(env.getProperty("LB_USUARIOS_URI") + "/authorized")
+                .redirectUri(lbUsuariosUri + "/login/oauth2/code/msvc-usuarios-client")
+                .redirectUri(lbUsuariosUri + "/authorized")
                 .scope(OidcScopes.OPENID)
                 .scope("read")
                 .scope("write")
-                .clientSettings(ClientSettings.builder()
-                        .requireAuthorizationConsent(true)
-                        .build())
+                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
                 .build();
 
-        return new InMemoryRegisteredClientRepository(oidcClient);
+        return new InMemoryRegisteredClientRepository(registeredClient);
     }
 
     @Bean
@@ -124,22 +128,23 @@ public class SecurityConfig {
     }
 
     private static KeyPair generateRsaKey() {
+        KeyPair keyPair;
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
             keyPairGenerator.initialize(2048);
-            return keyPairGenerator.generateKeyPair();
-        } catch (Exception ex) {
-            throw new IllegalStateException("Error generating RSA KeyPair", ex);
+            keyPair = keyPairGenerator.generateKeyPair();
         }
+        catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
+        return keyPair;
     }
 
     @Bean
-    public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
-        return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
-    }
-
-    @Bean
-    public ProviderSettings authorizationServerSettings() {
+    public ProviderSettings providerSettings() {
         return ProviderSettings.builder().build();
     }
+
 }
+
+

@@ -12,7 +12,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${LB_AUTH_ISSURE_URI:http://127.0.0.1:9000}
+          issuer-uri: ${LB_AUTH_ISSUER_URI:http://127.0.0.1:56609}
       client:
         registration:
           mscv-usuarios-client:
@@ -20,9 +20,9 @@ spring:
             client-id: usuarios-client
             client-secret: 12345
             authorization-grant-type: authorization_code
-            redirect-uri: ${LB_USUARIOS_URI:http://localhost:8001}/authorized
+            redirect-uri: ${LB_USUARIOS_URI:http://127.0.0.1:56680}/authorized
             scope: read
             client-name: mscv-usuarios-client
         provider:
           spring:
-            issuer-uri: ${LB_AUTH_ISSUER_URI:http://127.0.0.1:9000}
+            issuer-uri: ${LB_AUTH_ISSUER_URI:http://127.0.0.1:56609}
