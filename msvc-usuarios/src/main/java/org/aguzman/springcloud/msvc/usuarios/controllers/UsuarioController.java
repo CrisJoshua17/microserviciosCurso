@@ -117,6 +117,8 @@ public class UsuarioController {
         return Collections.singletonMap("code", code);
     }
 
+    
+
     @GetMapping("/login")
     public ResponseEntity<?> loginByEmail(@RequestParam String email) {
         Optional<Usuario> o = service.porEmail(email);

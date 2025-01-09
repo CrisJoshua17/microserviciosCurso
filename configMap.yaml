@@ -4,7 +4,7 @@ metadata:
   name: msvc-usuarios
 data:
   lb_auth_issuer_uri: "http://127.0.0.1:56609"
-  lb_usuarios_uri: "http://127.0.0.1:57177"
+  lb_usuarios_uri: "http://127.0.0.1:57882"
   port: "8001"
   db_host: mysql8:3306
   database: msvc_usuarios
